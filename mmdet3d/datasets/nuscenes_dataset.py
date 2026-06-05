@@ -161,7 +161,7 @@ class NuScenesDataset(Custom3DDataset):
                 otherwise, store empty list.
         """
         info = self.data_infos[idx]
-        if self.use_valid_flag:
+        if self.use_valid_flag and 'valid_flag' in info:
             mask = info['valid_flag']
             gt_names = set(info['gt_names'][mask])
         else:
@@ -220,20 +220,30 @@ class NuScenesDataset(Custom3DDataset):
         if self.modality['use_camera']:
             image_paths = []
             lidar2img_rts = []
-            for cam_type, cam_info in info['cams'].items():
-                image_paths.append(cam_info['data_path'])
-                # obtain lidar to image transformation matrix
-                lidar2cam_r = np.linalg.inv(cam_info['sensor2lidar_rotation'])
-                lidar2cam_t = cam_info[
-                    'sensor2lidar_translation'] @ lidar2cam_r.T
-                lidar2cam_rt = np.eye(4)
-                lidar2cam_rt[:3, :3] = lidar2cam_r.T
-                lidar2cam_rt[3, :3] = -lidar2cam_t
-                intrinsic = cam_info['cam_intrinsic']
-                viewpad = np.eye(4)
-                viewpad[:intrinsic.shape[0], :intrinsic.shape[1]] = intrinsic
-                lidar2img_rt = (viewpad @ lidar2cam_rt.T)
-                lidar2img_rts.append(lidar2img_rt)
+            if 'cams' in info:
+                for cam_type, cam_info in info['cams'].items():
+                    image_paths.append(cam_info['data_path'])
+                    # obtain lidar to image transformation matrix
+                    lidar2cam_r = np.linalg.inv(cam_info['sensor2lidar_rotation'])
+                    lidar2cam_t = cam_info[
+                        'sensor2lidar_translation'] @ lidar2cam_r.T
+                    lidar2cam_rt = np.eye(4)
+                    lidar2cam_rt[:3, :3] = lidar2cam_r.T
+                    lidar2cam_rt[3, :3] = -lidar2cam_t
+                    intrinsic = cam_info['cam_intrinsic']
+                    viewpad = np.eye(4)
+                    viewpad[:intrinsic.shape[0], :intrinsic.shape[1]] = intrinsic
+                    lidar2img_rt = (viewpad @ lidar2cam_rt.T)
+                    lidar2img_rts.append(lidar2img_rt)
+            elif 'all_cams_path' in info:
+                for i in range(len(info['all_cams_path'])):
+                    image_paths.append(info['all_cams_path'][i])
+                    lidar2cam_rt_T = info['all_cams_from_lidar'][i]
+                    intrinsic = info['all_cams_intrinsic'][i]
+                    viewpad = np.eye(4)
+                    viewpad[:intrinsic.shape[0], :intrinsic.shape[1]] = intrinsic
+                    lidar2img_rt = (viewpad @ lidar2cam_rt_T)
+                    lidar2img_rts.append(lidar2img_rt)
 
             input_dict.update(
                 dict(
@@ -263,10 +273,12 @@ class NuScenesDataset(Custom3DDataset):
         """
         info = self.data_infos[index]
         # filter out bbox containing no points
-        if self.use_valid_flag:
+        if self.use_valid_flag and 'valid_flag' in info:
             mask = info['valid_flag']
-        else:
+        elif 'num_lidar_pts' in info:
             mask = info['num_lidar_pts'] > 0
+        else:
+            mask = np.ones(len(info['gt_names']), dtype=bool)
         gt_bboxes_3d = info['gt_boxes'][mask]
         gt_names_3d = info['gt_names'][mask]
         gt_labels_3d = []
@@ -277,11 +289,18 @@ class NuScenesDataset(Custom3DDataset):
                 gt_labels_3d.append(-1)
         gt_labels_3d = np.array(gt_labels_3d)
 
-        if self.with_velocity:
-            gt_velocity = info['gt_velocity'][mask]
+        if self.with_velocity and gt_bboxes_3d.shape[-1] < 9:
+            if 'gt_velocity' in info:
+                gt_velocity = info['gt_velocity'][mask]
+            elif 'gt_boxes_velocity' in info:
+                gt_velocity = info['gt_boxes_velocity'][mask][:, :2]
+            else:
+                gt_velocity = np.zeros((len(gt_bboxes_3d), 2), dtype=np.float32)
             nan_mask = np.isnan(gt_velocity[:, 0])
             gt_velocity[nan_mask] = [0.0, 0.0]
             gt_bboxes_3d = np.concatenate([gt_bboxes_3d, gt_velocity], axis=-1)
+        elif not self.with_velocity and gt_bboxes_3d.shape[-1] >= 9:
+            gt_bboxes_3d = gt_bboxes_3d[:, :7]
 
         # the nuscenes box center is [0.5, 0.5, 0.5], we change it to be
         # the same as KITTI (0.5, 0.5, 0)

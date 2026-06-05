@@ -212,15 +212,34 @@ class LoadPointsFromMultiSweeps(object):
                     len(results['sweeps']), self.sweeps_num, replace=False)
             for idx in choices:
                 sweep = results['sweeps'][idx]
-                points_sweep = self._load_points(sweep['data_path'])
+                data_path = sweep.get('data_path', sweep.get('lidar_path'))
+                points_sweep = self._load_points(data_path)
                 points_sweep = np.copy(points_sweep).reshape(-1, self.load_dim)
                 if self.remove_close:
                     points_sweep = self._remove_close(points_sweep)
-                sweep_ts = sweep['timestamp'] / 1e6
-                points_sweep[:, :3] = points_sweep[:, :3] @ sweep[
-                    'sensor2lidar_rotation'].T
-                points_sweep[:, :3] += sweep['sensor2lidar_translation']
-                points_sweep[:, 4] = ts - sweep_ts
+                if 'time_lag' in sweep:
+                    time_lag = sweep['time_lag']
+                else:
+                    time_lag = ts - sweep['timestamp'] / 1e6
+                if 'sensor2lidar_rotation' in sweep:
+                    sensor2lidar_rotation = sweep['sensor2lidar_rotation']
+                else:
+                    tm = sweep.get('transform_matrix')
+                    if tm is not None:
+                        sensor2lidar_rotation = tm[:3, :3]
+                    else:
+                        sensor2lidar_rotation = np.eye(3)
+                if 'sensor2lidar_translation' in sweep:
+                    sensor2lidar_translation = sweep['sensor2lidar_translation']
+                else:
+                    tm = sweep.get('transform_matrix')
+                    if tm is not None:
+                        sensor2lidar_translation = tm[:3, 3]
+                    else:
+                        sensor2lidar_translation = np.zeros(3)
+                points_sweep[:, :3] = points_sweep[:, :3] @ sensor2lidar_rotation.T
+                points_sweep[:, :3] += sensor2lidar_translation
+                points_sweep[:, 4] = time_lag
                 points_sweep = points.new_point(points_sweep)
                 sweep_points_list.append(points_sweep)
 

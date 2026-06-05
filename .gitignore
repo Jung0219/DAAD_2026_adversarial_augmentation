@@ -112,6 +112,7 @@ data
 
 # custom
 *.pkl
+*.pickle
 *.pkl.json
 *.log.json
 work_dirs/
