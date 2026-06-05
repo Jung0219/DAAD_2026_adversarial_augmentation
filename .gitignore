@@ -105,8 +105,16 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# Local datasets
+data/*
+!data/
+!data/DATA_TODO.md
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
 # cython generated cpp
-data
 .vscode
 .idea
 
@@ -114,6 +122,8 @@ data
 *.pkl
 *.pickle
 *.pkl.json
+*.out
+*.err
 *.log.json
 work_dirs/
 exps/
@@ -122,6 +132,18 @@ mmdet3d/.mim
 
 # Pytorch
 *.pth
+*.pt
+*.ckpt
+
+# Compiled extension/build artifacts
+*.o
+*.cuda.o
+.ninja_deps
+.ninja_log
+build.ninja
+
+# Nested repository metadata for vendored projects
+**/.git/
 
 # demo
 *.jpg
