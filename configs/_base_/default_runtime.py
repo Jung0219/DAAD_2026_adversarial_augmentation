@@ -18,3 +18,8 @@ resume_from = None
 workflow = [('train', 1)]
 device = 'cuda'
 
+custom_imports = dict(
+    imports=['projects.adv_aug.plugins'],
+    allow_failed_imports=False
+)
+

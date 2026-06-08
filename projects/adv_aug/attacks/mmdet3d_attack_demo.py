@@ -75,7 +75,7 @@ def main():
     model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
     
     # Load pre-trained checkpoint
-    checkpoint_path = 'projects/adv_aug/PointPillars/checkpoints/hv_pointpillars_fpn_sbn-all_4x8_2x_nus-3d_20200620_230405-2fa62f3d.pth'
+    checkpoint_path = 'projects/adv_aug/checkpoints/pointpillars/hv_pointpillars_fpn_sbn-all_4x8_2x_nus-3d_20200620_230405-2fa62f3d.pth'
     print(f"Loading checkpoint from: {checkpoint_path}")
     checkpoint = load_checkpoint(model, checkpoint_path, map_location='cpu')
     

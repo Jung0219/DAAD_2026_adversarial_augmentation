@@ -130,6 +130,16 @@ exps/
 *~
 mmdet3d/.mim
 
+# Adversarial augmentation generated artifacts
+projects/adv_aug/runs/**
+!projects/adv_aug/runs/
+!projects/adv_aug/runs/**/
+!projects/adv_aug/runs/**/README.md
+!projects/adv_aug/runs/**/metadata.json
+projects/adv_aug/logs/
+projects/adv_aug/attacks/slurm_*.out
+projects/adv_aug/attacks/slurm_*.err
+
 # Pytorch
 *.pth
 *.pt

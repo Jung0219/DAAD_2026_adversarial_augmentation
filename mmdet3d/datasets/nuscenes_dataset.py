@@ -136,6 +136,24 @@ class NuScenesDataset(Custom3DDataset):
             filter_empty_gt=filter_empty_gt,
             test_mode=test_mode)
 
+        # Add compatibility for custom info formats missing standard transformation keys
+        import numpy as np
+        from pyquaternion import Quaternion
+        for info in self.data_infos:
+            if 'lidar2ego_rotation' not in info and 'ref_from_car' in info:
+                T_ref_from_car = np.array(info['ref_from_car'])
+                T_car_from_ref = np.linalg.inv(T_ref_from_car)
+                q = Quaternion(matrix=T_car_from_ref[:3, :3])
+                info['lidar2ego_rotation'] = q.elements
+                info['lidar2ego_translation'] = T_car_from_ref[:3, 3]
+
+            if 'ego2global_rotation' not in info and 'car_from_global' in info:
+                T_car_from_global = np.array(info['car_from_global'])
+                T_global_from_car = np.linalg.inv(T_car_from_global)
+                q_global = Quaternion(matrix=T_global_from_car[:3, :3])
+                info['ego2global_rotation'] = q_global.elements
+                info['ego2global_translation'] = T_global_from_car[:3, 3]
+
         self.with_velocity = with_velocity
         self.eval_version = eval_version
         from nuscenes.eval.detection.config import config_factory

@@ -86,7 +86,7 @@ code.
 
 ### Phase 1: Setup and Baseline Model Validation
 
-**Status:** Current phase.
+**Status:** Completed.
 
 Goal: confirm that all four models can train and test on regular, non-adversarial
 data before any adversarial augmentation work is introduced.
@@ -100,10 +100,11 @@ Tracking table:
 
 | Model | Train smoke test | Test smoke test | Notes |
 | --- | --- | --- | --- |
-| PointPillars | Pending | Pending | - |
-| CenterPoint | Pending | Pending | - |
-| FocalFormer3D | Pending | Pending | - |
-| PillarNeSt | Pending | Pending | - |
+| PointPillars | Passed | Passed | Checked via standard tools and attacks/mmdet3d_attack_demo.py |
+| CenterPoint | Passed | Passed | Checked via tools/train.py and tools/test.py |
+| FocalFormer3D | Passed | Passed | Checked via projects/adv_aug/FocalFormer3D/tools/test.py (handles plugin compilation/registration) |
+| PillarNeSt | Passed | Passed | Checked via tools/train.py and tools/test.py (plugins auto-imported via mmdet3d/models/__init__.py) |
+
 
 Exit criteria:
 
@@ -179,20 +180,18 @@ Evaluation should compare:
 
 ## 5. Current Decisions
 
-1. The active project phase is **Phase 1: Setup and Baseline Model Validation**.
-2. No model has been confirmed yet for regular train/test smoke validation.
+1. The active project phase is **Phase 2: Pipeline Familiarization and Minimal Gradient Sample**.
+2. All baseline models (PointPillars, CenterPoint, FocalFormer3D, PillarNeSt) have been successfully smoke-tested on standard training and evaluation pipelines.
 3. The existing exploratory attack scripts are not counted as completed project
    milestones.
 4. Regular augmentation belongs primarily in `data.train.pipeline`.
 5. Gradient-guided adversarial augmentation will likely require customization
    inside the model training path, not only the dataloader.
-6. The implementation phase must wait until the four baseline model paths are
+6. The implementation phase can proceed as the four baseline model paths are
    smoke-tested on regular data.
 
 ---
 
 ## 6. Immediate Next Step
 
-Run and document regular-data smoke tests for PointPillars, CenterPoint,
-FocalFormer3D, and PillarNeSt. The output of this phase should be a clear
-pass/fail table with notes for training and testing for each model.
+Begin Phase 2 pipeline familiarization by understanding the voxelization autograd boundary and implementing voxel-level gradient-informed perturbations inside the models' training loop (e.g., implementing/overriding `AdversarialAugmentationWrapper` or detector `train_step`).

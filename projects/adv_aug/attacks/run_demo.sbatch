@@ -8,8 +8,8 @@
 # ==============================================================================
 
 #SBATCH --job-name=mmdet3d-attack-demo
-#SBATCH --output=projects/adv_aug/attacks/slurm_%j.out
-#SBATCH --error=projects/adv_aug/attacks/slurm_%j.err
+#SBATCH --output=/beegfs/jung/mmdet3d_legacy/projects/adv_aug/attacks/slurm_%j.out
+#SBATCH --error=/beegfs/jung/mmdet3d_legacy/projects/adv_aug/attacks/slurm_%j.err
 #SBATCH --partition=gpu            # Verify partition name on your cluster
 #SBATCH --account=etechnik_gpu      # GPU partition allowed account for user jung
 #SBATCH --gres=gpu:1               # Request 1 GPU
