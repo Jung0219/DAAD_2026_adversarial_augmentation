@@ -50,4 +50,4 @@ This report summarizes the performance of the four baseline 3D object detection 
 ## 4. Slurm Evaluation Logs Directory
 
 All detailed metrics, evaluation prints, and prediction dumps are logged under:
-* [projects/adv_aug/logs/](file:///beegfs/jung/mmdet3d_legacy/projects/adv_aug/logs/)
+* [projects/adv_aug/runs/](file:///home/btq48260/DAAD_2026_adversarial_augmentation/projects/adv_aug/runs/)

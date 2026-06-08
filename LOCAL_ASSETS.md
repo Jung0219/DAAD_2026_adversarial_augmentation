@@ -31,7 +31,7 @@ data/nuscenes/nuscenes_infos_val.pkl
 Current local source on this server:
 
 ```text
-/beegfs/jung/mmdet3d_legacy/data/nuscenes/
+/hpcwork/rwth2049/clean_data/nuscenes/
 ```
 
 ### KITTI

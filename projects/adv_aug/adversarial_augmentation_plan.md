@@ -22,7 +22,7 @@ test correctly on regular data.
 ## 2. Target Environment and Models
 
 * **Codebase:** Legacy MMDetection3D v0.18.1 at
-  `/beegfs/jung/mmdet3d_legacy`.
+  `/home/btq48260/DAAD_2026_adversarial_augmentation`.
 * **Conda environment:** `AA_legacy` with Python 3.8, PyTorch 1.12.1, and CUDA
   11.3.
 * **Dataset:** nuScenes, using small smoke runs first and larger benchmarks only

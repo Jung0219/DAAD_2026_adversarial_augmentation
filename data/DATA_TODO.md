@@ -2,8 +2,8 @@
 
 ## KITTI
 
-- [ ] Extract `/beegfs/chandorkar/kai_data/kitti.tar` under `/beegfs/jung/mmdet3d_legacy/data/`.
-- [ ] Confirm the final root is `/beegfs/jung/mmdet3d_legacy/data/kitti/`.
+- [ ] Extract `/beegfs/chandorkar/kai_data/kitti.tar` under `/home/btq48260/DAAD_2026_adversarial_augmentation/data/`.
+- [ ] Confirm the final root is `/home/btq48260/DAAD_2026_adversarial_augmentation/data/kitti/`.
 - [ ] Confirm the expected raw structure exists:
   - `data/kitti/ImageSets/`
   - `data/kitti/training/calib/`
@@ -27,8 +27,8 @@
 
 ## Waymo
 
-- [ ] Extract `/beegfs/chandorkar/kai_data/waymo.tar` under `/beegfs/jung/mmdet3d_legacy/data/`.
-- [ ] Confirm the final root is `/beegfs/jung/mmdet3d_legacy/data/waymo/`.
+- [ ] Extract `/beegfs/chandorkar/kai_data/waymo.tar` under `/home/btq48260/DAAD_2026_adversarial_augmentation/data/`.
+- [ ] Confirm the final root is `/home/btq48260/DAAD_2026_adversarial_augmentation/data/waymo/`.
 - [ ] Confirm the expected raw structure exists:
   - `data/waymo/waymo_format/training/`
   - `data/waymo/waymo_format/validation/`

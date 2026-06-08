@@ -4,22 +4,22 @@
 # SLURM Batch Script for Adversarial Augmentation Experiments
 #
 # Submit this script with:
-#   sbatch projects/adv_aug/scripts/run_experiment.sbatch {train|test} {model}
+#   sbatch projects/adv_aug/scripts/submit/run_experiment.sbatch {train|test} {model}
 #
 # Examples:
-#   sbatch projects/adv_aug/scripts/run_experiment.sbatch train pointpillars
-#   sbatch projects/adv_aug/scripts/run_experiment.sbatch test focalformer3d
+#   sbatch projects/adv_aug/scripts/submit/run_experiment.sbatch train pointpillars
+#   sbatch projects/adv_aug/scripts/submit/run_experiment.sbatch test focalformer3d
 # ==============================================================================
 
 #SBATCH --job-name=adv-aug-exp
 #SBATCH --output=projects/adv_aug/runs/adhoc/logs/%x_%j.log
 #SBATCH --error=projects/adv_aug/runs/adhoc/logs/%x_%j.log
-#SBATCH --partition=gpu
-#SBATCH --account=etechnik_gpu
+#SBATCH --partition=c23g
+#SBATCH --account=default
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
-#SBATCH --time=12:00:00
+#SBATCH --time=00:30:00
 
 # Exit immediately if a command exits with a non-zero status
 set -e
@@ -37,17 +37,20 @@ if [ -z "$ACTION" ] || [ -z "$MODEL" ]; then
     usage
 fi
 
-CODEBASE_ROOT="/beegfs/jung/mmdet3d_legacy"
+CODEBASE_ROOT="/home/btq48260/DAAD_2026_adversarial_augmentation"
 cd "${CODEBASE_ROOT}"
 
+# Load modules
+module load GCC/11.3.0 CUDA/11.8.0
+
 # Activate the environment
-source /beegfs/jung/miniforge3/etc/profile.d/conda.sh
-conda activate AA_legacy
+source /home/btq48260/.miniforge/etc/profile.d/conda.sh
+conda activate AA
 
 # Set PYTHONPATH and LD_PRELOAD
 export PYTHONPATH=.
 export PYTHONUNBUFFERED=1
-export LD_PRELOAD="/beegfs/jung/miniforge3/envs/AA_legacy/lib/libstdc++.so.6"
+export LD_PRELOAD="/home/btq48260/.miniforge/lib/libstdc++.so.6"
 
 # Define configurations and checkpoints
 case "$MODEL" in

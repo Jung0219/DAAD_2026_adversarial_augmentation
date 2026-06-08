@@ -8,23 +8,25 @@ cwd = os.path.dirname(os.path.realpath(__file__))
 
 sources = []
 
-assert torch.cuda.is_available(), 'local attention needs cuda!'
 if torch.cuda.is_available():
     sources.append(os.path.join(cwd, 'similar.cu'))
     sources.append(os.path.join(cwd, 'weighting.cu'))
     sources.append(os.path.join(cwd, 'localAttention.cpp'))
-extra_cuda_cflags=[
-                "-DCUDA_HAS_FP16=1",
-                "-D__CUDA_NO_HALF_OPERATORS__",
-                "-D__CUDA_NO_HALF_CONVERSIONS__",
-                "-D__CUDA_NO_HALF2_OPERATORS__",
-                "-std=c++17",
-                "-DCCCL_IGNORE_DEPRECATED_CPP_DIALECT"
-]
-localattention = cpp_extension.load('localattention',
-                                    sources=sources,
-                                    build_directory=cwd,
-                                    extra_cflags=["-std=c++17", "-DCCCL_IGNORE_DEPRECATED_CPP_DIALECT"],
-                                    extra_cuda_cflags=extra_cuda_cflags,
-                                    verbose=True)
+    extra_cuda_cflags=[
+                    "-DCUDA_HAS_FP16=1",
+                    "-D__CUDA_NO_HALF_OPERATORS__",
+                    "-D__CUDA_NO_HALF_CONVERSIONS__",
+                    "-D__CUDA_NO_HALF2_OPERATORS__",
+                    "-std=c++17",
+                    "-DCCCL_IGNORE_DEPRECATED_CPP_DIALECT"
+    ]
+    localattention = cpp_extension.load('localattention',
+                                        sources=sources,
+                                        build_directory=cwd,
+                                        extra_cflags=["-std=c++17", "-DCCCL_IGNORE_DEPRECATED_CPP_DIALECT"],
+                                        extra_cuda_cflags=extra_cuda_cflags,
+                                        verbose=True)
+else:
+    localattention = None
+
 
