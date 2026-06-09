@@ -8,7 +8,7 @@
 #SBATCH --time=01:00:00
 
 source ~/.bashrc
-conda activate AA
+conda activate AA_legacy
 export PYTHONPATH=.
 export PYTHONUNBUFFERED=1
 
