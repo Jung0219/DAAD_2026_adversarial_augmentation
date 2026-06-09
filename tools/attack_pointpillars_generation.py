@@ -43,7 +43,15 @@ def get_predictions_confidence_drop(model, data_batch, points, original_mean_con
     return mean_conf
 
 def apply_attack(model, data_batch, max_iters=30, alpha=0.01):
-    points = data_batch['points'][0].clone() # [N, 5]
+    points_list = data_batch['points']
+    if hasattr(points_list, 'data'):
+        points_list = points_list.data
+    points_tensor = points_list[0]
+    if hasattr(points_tensor, 'data'):
+        points_tensor = points_tensor.data
+    if isinstance(points_tensor, list):
+        points_tensor = points_tensor[0]
+    points = points_tensor.clone() # [N, 5]
     device = points.device
     
     # Evaluate initial confidence
@@ -180,6 +188,17 @@ def main():
         data_batch = collate([sample], samples_per_gpu=1)
         if torch.cuda.is_available():
             data_batch = scatter(data_batch, [0])[0]
+        else:
+            for k, v in data_batch.items():
+                if hasattr(v, 'data'):
+                    val = v.data[0]
+                    if isinstance(val, list) and len(val) > 0 and hasattr(val[0], 'data'):
+                        val = [x.data for x in val]
+                    elif hasattr(val, 'data'):
+                        val = val.data
+                    data_batch[k] = val
+            if isinstance(data_batch['img_metas'], list) and not isinstance(data_batch['img_metas'][0], list):
+                data_batch['img_metas'] = [data_batch['img_metas']]
             
         points_history = apply_attack(model, data_batch, max_iters=30, alpha=0.01)
         
