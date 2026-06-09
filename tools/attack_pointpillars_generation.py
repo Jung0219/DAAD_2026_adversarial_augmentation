@@ -118,12 +118,12 @@ def apply_attack(model, data_batch, max_iters=30, alpha=0.01):
         voxels_tuple = model.voxelize([points_with_idx])
         res_voxels, res_num_points, res_coors = voxels_tuple
         
-        voxel_point_indices = res_voxels[..., 5].long()
-        voxels_5d = res_voxels[..., :5].detach().clone()
-        voxels_5d.requires_grad = True
+        voxel_point_indices = res_voxels[..., -1].long()   # last channel = point index
+        voxels_feat = res_voxels[..., :-1].detach().clone()  # all but last = point features
+        voxels_feat.requires_grad = True
         
         # Encoder forward
-        voxel_features = model.pts_voxel_encoder(voxels_5d, res_num_points, res_coors)
+        voxel_features = model.pts_voxel_encoder(voxels_feat, res_num_points, res_coors)
         batch_size = res_coors[-1, 0] + 1
         x = model.pts_middle_encoder(voxel_features, res_coors, batch_size)
         x = model.pts_backbone(x)
@@ -143,14 +143,15 @@ def apply_attack(model, data_batch, max_iters=30, alpha=0.01):
         model.zero_grad()
         loss.backward()
         
-        grad = voxels_5d.grad # [M, max_points, 5]
+        grad = voxels_feat.grad  # [M, max_pts_per_voxel, n_feats]
         
         # Accumulate gradients to points
-        point_grads = torch.zeros((num_points, 5), device=device)
+        n_feats = points.shape[1]
+        point_grads = torch.zeros((num_points, n_feats), device=device)
         mask = get_paddings_indicator(res_num_points, res_voxels.shape[1], axis=0)
         valid_grads = grad[mask]
         valid_indices = voxel_point_indices[mask]
-        point_grads.scatter_add_(0, valid_indices.unsqueeze(1).expand(-1, 5), valid_grads)
+        point_grads.scatter_add_(0, valid_indices.unsqueeze(1).expand(-1, n_feats), valid_grads)
         
         # 2. Perturbation: PGD
         # Perturb x,y,z only
