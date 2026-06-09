@@ -3,7 +3,6 @@
 #SBATCH --output=projects/adv_aug/runs/EXP-002/logs/generation_%j.out
 #SBATCH --error=projects/adv_aug/runs/EXP-002/logs/generation_%j.err
 #SBATCH --partition=gpu
-#SBATCH --account=default
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --time=01:00:00
