@@ -24,22 +24,31 @@ def sum_losses(losses):
                 total_loss += v.mean()
     return total_loss
 
+
+def direct_inference(model, points_tensor, img_metas):
+    """Run inference directly through model internals.
+
+    Bypasses forward_test/simple_test which expect test-mode data layout.
+    Works with raw [N, 5] point tensors from train-pipeline data.
+    """
+    with torch.no_grad():
+        voxels, num_points, coors = model.voxelize([points_tensor])
+        voxel_features = model.pts_voxel_encoder(voxels, num_points, coors)
+        batch_size = coors[-1, 0] + 1
+        x = model.pts_middle_encoder(voxel_features, coors, batch_size)
+        x = model.pts_backbone(x)
+        if model.with_pts_neck:
+            x = model.pts_neck(x)
+        outs = model.pts_bbox_head(x)
+        bbox_list = model.pts_bbox_head.get_bboxes(
+            *outs, img_metas, rescale=True)
+    return bbox_list
+
 def get_predictions_confidence_drop(model, data_batch, points, original_mean_conf):
     """Run forward test to get bounding boxes and measure confidence drop."""
-    # Temporarily replace points
-    old_points = data_batch['points']
-    data_batch['points'] = [points]
-    
-    test_batch = {k: v for k, v in data_batch.items() if not k.startswith('gt_')}
-    with torch.no_grad():
-        results = model(return_loss=False, rescale=True, **test_batch)
-    
-    data_batch['points'] = old_points
-    
-    # results is a list of dicts. We have batch_size=1
-    boxes_3d = results[0]['pts_bbox']['boxes_3d']
-    scores_3d = results[0]['pts_bbox']['scores_3d']
-    
+    img_metas = data_batch['img_metas']
+    bbox_list = direct_inference(model, points, img_metas)
+    scores_3d = bbox_list[0][1]
     mean_conf = scores_3d.mean().item() if len(scores_3d) > 0 else 0.0
     return mean_conf
 
@@ -55,12 +64,11 @@ def apply_attack(model, data_batch, max_iters=30, alpha=0.01):
     points = points_tensor.clone() # [N, 5]
     device = points.device
     
-    # Evaluate initial confidence — strip GT keys for test-mode forward
-    test_batch = {k: v for k, v in data_batch.items() if not k.startswith('gt_')}
-    with torch.no_grad():
-        initial_results = model(return_loss=False, rescale=True, **test_batch)
-    if len(initial_results[0]['pts_bbox']['scores_3d']) > 0:
-        initial_conf = initial_results[0]['pts_bbox']['scores_3d'].mean().item()
+    # Evaluate initial confidence via direct inference
+    img_metas = data_batch['img_metas']
+    bbox_list = direct_inference(model, points, img_metas)
+    if len(bbox_list[0][1]) > 0:
+        initial_conf = bbox_list[0][1].mean().item()
     else:
         initial_conf = 0.0
         
