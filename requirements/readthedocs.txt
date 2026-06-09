@@ -1,5 +1,0 @@
-mmcv
-mmdet
-mmsegmentation>=0.20.1
-torch
-torchvision
