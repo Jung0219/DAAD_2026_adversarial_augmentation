@@ -97,8 +97,8 @@ def apply_attack(model, data_batch, max_iters=30, alpha=0.01):
         points_with_idx = torch.cat([points, indices], dim=1)
         
         # Forward pass until voxelization
-        voxels, coors, voxel_num_points = [], [], []
-        res_voxels, res_coors, res_num_points = model.pts_voxel_layer(points_with_idx)
+        voxels_tuple = model.voxelize([points_with_idx])
+        res_voxels, res_num_points, res_coors = voxels_tuple
         
         voxel_point_indices = res_voxels[..., 5].long()
         voxels_5d = res_voxels[..., :5].detach().clone()
