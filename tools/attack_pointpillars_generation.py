@@ -101,10 +101,10 @@ def apply_attack(model, data_batch, max_iters=30, alpha=0.01):
             
             global_pts = torch.stack([x, y, z], dim=1) + sampled_boxes[:, :3]
             
-            # Additional features: intensity, ring index
-            extra_feats = torch.zeros(50, 2, device=device)
-            extra_feats[:, 0] = 0.5 # mid intensity
-            extra_feats[:, 1] = 0.0 # ring 0
+            # Match feature dimension of existing points (4 or 5)
+            n_extra = points.shape[1] - 3
+            extra_feats = torch.zeros(50, n_extra, device=device)
+            extra_feats[:, 0] = 0.5  # mid intensity
             
             new_points = torch.cat([global_pts, extra_feats], dim=1)
             points = torch.cat([points, new_points], dim=0)
