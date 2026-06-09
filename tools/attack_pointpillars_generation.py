@@ -167,6 +167,9 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     cfg.data.val.data_root = 'data/nuscenes/'
+    # Override to train pipeline so GT boxes are available for attachment attack
+    cfg.data.val.test_mode = False
+    cfg.data.val.pipeline = cfg.data.train.pipeline
     dataset = build_dataset(cfg.data.val)
     
     model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
