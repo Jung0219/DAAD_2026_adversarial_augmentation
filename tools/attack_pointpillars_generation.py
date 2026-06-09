@@ -30,8 +30,9 @@ def get_predictions_confidence_drop(model, data_batch, points, original_mean_con
     old_points = data_batch['points']
     data_batch['points'] = [points]
     
+    test_batch = {k: v for k, v in data_batch.items() if not k.startswith('gt_')}
     with torch.no_grad():
-        results = model(return_loss=False, rescale=True, **data_batch)
+        results = model(return_loss=False, rescale=True, **test_batch)
     
     data_batch['points'] = old_points
     
@@ -54,9 +55,10 @@ def apply_attack(model, data_batch, max_iters=30, alpha=0.01):
     points = points_tensor.clone() # [N, 5]
     device = points.device
     
-    # Evaluate initial confidence
+    # Evaluate initial confidence — strip GT keys for test-mode forward
+    test_batch = {k: v for k, v in data_batch.items() if not k.startswith('gt_')}
     with torch.no_grad():
-        initial_results = model(return_loss=False, rescale=True, **data_batch)
+        initial_results = model(return_loss=False, rescale=True, **test_batch)
     if len(initial_results[0]['pts_bbox']['scores_3d']) > 0:
         initial_conf = initial_results[0]['pts_bbox']['scores_3d'].mean().item()
     else:
