@@ -1,6 +1,9 @@
 import torch
 
-from . import roiaware_pool3d_ext
+try:
+    from . import roiaware_pool3d_ext
+except ImportError:
+    roiaware_pool3d_ext = None
 
 
 def points_in_boxes_gpu(points, boxes):

@@ -3,7 +3,10 @@ import torch
 from torch import nn as nn
 from torch.autograd import Function
 
-from . import roiaware_pool3d_ext
+try:
+    from . import roiaware_pool3d_ext
+except ImportError:
+    roiaware_pool3d_ext = None
 
 
 class RoIAwarePool3d(nn.Module):

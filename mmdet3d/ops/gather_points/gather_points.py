@@ -1,7 +1,10 @@
 import torch
 from torch.autograd import Function
 
-from . import gather_points_ext
+try:
+    from . import gather_points_ext
+except ImportError:
+    gather_points_ext = None
 
 
 class GatherPoints(Function):

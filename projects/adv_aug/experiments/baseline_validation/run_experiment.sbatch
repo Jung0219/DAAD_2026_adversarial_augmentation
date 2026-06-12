@@ -12,14 +12,14 @@
 # ==============================================================================
 
 #SBATCH --job-name=adv-aug-exp
-#SBATCH --output=projects/adv_aug/runs/adhoc/logs/%x_%j.log
-#SBATCH --error=projects/adv_aug/runs/adhoc/logs/%x_%j.log
+#SBATCH --output=experiments/baseline_validation/logs/%x_%j.log
+#SBATCH --error=experiments/baseline_validation/logs/%x_%j.log
 #SBATCH --partition=gpu
 #SBATCH --account=etechnik_gpu
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
-#SBATCH --time=00:30:00
+#SBATCH --time=01:00:00
 
 # Exit immediately if a command exits with a non-zero status
 
@@ -47,6 +47,8 @@ cd "${CODEBASE_ROOT}"
 # Set PYTHONPATH and LD_PRELOAD
 export PYTHONPATH=.
 export PYTHONUNBUFFERED=1
+
+mkdir -p experiments/baseline_validation/logs/
 
 # Define configurations and checkpoints
 case "$MODEL" in
@@ -86,7 +88,7 @@ case "$ACTION" in
         echo "Config:     ${CONFIG}"
         echo "Checkpoint: ${CHECKPOINT}"
         echo "========================================"
-        python tools/test.py "${CONFIG}" "${CHECKPOINT}" --eval bbox
+        python tools/test.py "${CONFIG}" "${CHECKPOINT}" --eval bbox --out experiments/baseline_validation/results/${MODEL}_res.pkl
         ;;
     *)
         echo "Error: Unknown action '$ACTION'."

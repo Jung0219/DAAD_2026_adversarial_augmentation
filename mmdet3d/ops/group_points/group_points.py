@@ -5,7 +5,10 @@ from typing import Tuple
 
 from ..ball_query import ball_query
 from ..knn import knn
-from . import group_points_ext
+try:
+    from . import group_points_ext
+except ImportError:
+    group_points_ext = None
 
 
 class QueryAndGroup(nn.Module):

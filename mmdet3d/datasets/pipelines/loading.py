@@ -213,8 +213,11 @@ class LoadPointsFromMultiSweeps(object):
             for idx in choices:
                 sweep = results['sweeps'][idx]
                 data_path = sweep.get('data_path', sweep.get('lidar_path'))
-                points_sweep = self._load_points(data_path)
-                points_sweep = np.copy(points_sweep).reshape(-1, self.load_dim)
+                try:
+                    points_sweep = self._load_points(data_path)
+                    points_sweep = np.copy(points_sweep).reshape(-1, self.load_dim)
+                except FileNotFoundError:
+                    continue
                 if self.remove_close:
                     points_sweep = self._remove_close(points_sweep)
                 if 'time_lag' in sweep:

@@ -408,7 +408,7 @@ class HardVFE(nn.Module):
         if self._with_cluster_center:
             points_mean = (
                 features[:, :, :3].sum(dim=1, keepdim=True) /
-                num_points.type_as(features).view(-1, 1, 1))
+                num_points.type_as(features).clamp(min=1).view(-1, 1, 1))
             # TODO: maybe also do cluster for reflectivity
             f_cluster = features[:, :, :3] - points_mean
             features_ls.append(f_cluster)

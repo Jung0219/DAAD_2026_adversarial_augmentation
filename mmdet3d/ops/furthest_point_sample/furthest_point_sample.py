@@ -1,7 +1,10 @@
 import torch
 from torch.autograd import Function
 
-from . import furthest_point_sample_ext
+try:
+    from . import furthest_point_sample_ext
+except ImportError:
+    furthest_point_sample_ext = None
 
 
 class FurthestPointSampling(Function):

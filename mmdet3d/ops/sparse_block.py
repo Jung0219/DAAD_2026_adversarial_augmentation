@@ -46,21 +46,21 @@ class SparseBottleneck(Bottleneck, spconv.SparseModule):
         identity = x.features
 
         out = self.conv1(x)
-        out.features = self.bn1(out.features)
-        out.features = self.relu(out.features)
+        out = out.replace_feature(self.bn1(out.features))
+        out = out.replace_feature(self.relu(out.features))
 
         out = self.conv2(out)
-        out.features = self.bn2(out.features)
-        out.features = self.relu(out.features)
+        out = out.replace_feature(self.bn2(out.features))
+        out = out.replace_feature(self.relu(out.features))
 
         out = self.conv3(out)
-        out.features = self.bn3(out.features)
+        out = out.replace_feature(self.bn3(out.features))
 
         if self.downsample is not None:
-            identity = self.downsample(x)
+            identity = self.downsample(x).features
 
-        out.features += identity
-        out.features = self.relu(out.features)
+        out = out.replace_feature(out.features + identity)
+        out = out.replace_feature(self.relu(out.features))
 
         return out
 
@@ -106,17 +106,17 @@ class SparseBasicBlock(BasicBlock, spconv.SparseModule):
         assert x.features.dim() == 2, f'x.features.dim()={x.features.dim()}'
 
         out = self.conv1(x)
-        out.features = self.norm1(out.features)
-        out.features = self.relu(out.features)
+        out = out.replace_feature(self.norm1(out.features))
+        out = out.replace_feature(self.relu(out.features))
 
         out = self.conv2(out)
-        out.features = self.norm2(out.features)
+        out = out.replace_feature(self.norm2(out.features))
 
         if self.downsample is not None:
-            identity = self.downsample(x)
+            identity = self.downsample(x).features
 
-        out.features += identity
-        out.features = self.relu(out.features)
+        out = out.replace_feature(out.features + identity)
+        out = out.replace_feature(self.relu(out.features))
 
         return out
 
@@ -156,27 +156,21 @@ def make_sparse_convmodule(in_channels,
     layers = list()
     for layer in order:
         if layer == 'conv':
-            if conv_type not in [
-                    'SparseInverseConv3d', 'SparseInverseConv2d',
-                    'SparseInverseConv1d'
-            ]:
-                layers.append(
-                    build_conv_layer(
-                        conv_cfg,
-                        in_channels,
-                        out_channels,
-                        kernel_size,
-                        stride=stride,
-                        padding=padding,
-                        bias=False))
-            else:
-                layers.append(
-                    build_conv_layer(
-                        conv_cfg,
-                        in_channels,
-                        out_channels,
-                        kernel_size,
-                        bias=False))
+            kwargs = dict(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+                bias=False,
+                indice_key=indice_key
+            )
+            if conv_type in ['SparseInverseConv3d', 'SparseInverseConv2d', 'SparseInverseConv1d']:
+                kwargs.pop('stride')
+                kwargs.pop('padding')
+            
+            conv_layer = getattr(spconv, conv_type)(**kwargs)
+            layers.append(conv_layer)
         elif layer == 'norm':
             layers.append(build_norm_layer(norm_cfg, out_channels)[1])
         elif layer == 'act':

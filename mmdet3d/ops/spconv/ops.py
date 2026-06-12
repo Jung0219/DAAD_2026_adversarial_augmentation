@@ -14,7 +14,10 @@
 
 import torch
 
-from . import sparse_conv_ext
+try:
+    import spconv.core as sparse_conv_ext
+except ImportError:
+    sparse_conv_ext = None
 
 
 def get_conv_output_size(input_size, kernel_size, stride, padding, dilation):

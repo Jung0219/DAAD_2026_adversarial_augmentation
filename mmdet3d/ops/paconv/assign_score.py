@@ -1,6 +1,9 @@
 from torch.autograd import Function
 
-from . import assign_score_withk_ext
+try:
+    from . import assign_score_withk_ext
+except ImportError:
+    assign_score_withk_ext = None
 
 
 class AssignScoreWithK(Function):

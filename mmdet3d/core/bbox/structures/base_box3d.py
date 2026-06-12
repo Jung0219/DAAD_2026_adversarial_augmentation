@@ -3,7 +3,10 @@ import numpy as np
 import torch
 from abc import abstractmethod
 
-from mmdet3d.ops.iou3d import iou3d_cuda
+try:
+    from mmdet3d.ops.iou3d import iou3d_cuda
+except ImportError:
+    iou3d_cuda = None
 from .utils import limit_period, xywhr2xyxyr
 
 

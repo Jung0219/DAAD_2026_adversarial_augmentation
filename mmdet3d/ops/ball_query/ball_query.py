@@ -1,7 +1,10 @@
 import torch
 from torch.autograd import Function
 
-from . import ball_query_ext
+try:
+    from . import ball_query_ext
+except ImportError:
+    ball_query_ext = None
 
 
 class BallQuery(Function):

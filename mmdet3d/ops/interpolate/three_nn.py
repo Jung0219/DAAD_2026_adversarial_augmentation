@@ -2,7 +2,10 @@ import torch
 from torch.autograd import Function
 from typing import Tuple
 
-from . import interpolate_ext
+try:
+    from . import interpolate_ext
+except ImportError:
+    interpolate_ext = None
 
 
 class ThreeNN(Function):

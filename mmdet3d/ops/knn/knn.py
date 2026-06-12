@@ -1,7 +1,10 @@
 import torch
 from torch.autograd import Function
 
-from . import knn_ext
+try:
+    from . import knn_ext
+except ImportError:
+    knn_ext = None
 
 
 class KNN(Function):

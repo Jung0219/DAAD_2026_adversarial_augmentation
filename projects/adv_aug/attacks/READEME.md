@@ -1,2 +1,0 @@
-These three files are copied from IJCV paper A Comprehensive Study of the Robustness for LiDAR-based 3D Object Detectors against Adversarial Attacks. 
-The code is implemented based on openpcdet, which is a different codebase than ours so it needs modification. 
